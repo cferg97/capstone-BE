@@ -24,6 +24,21 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+usersRouter.get("/:username", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await usersModel.findOne({username: req.params.username}).select("-street -zip -city -_id")
+    if(user){
+      res.send(user)
+    }
+    else{
+      next(createHttpError(404, `User not found for username "${req.params.username}"`))
+    }
+    
+  } catch (err) {
+    next(err)
+  }
+})
+
 usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const updatedUser = await usersModel.findByIdAndUpdate(
