@@ -1,0 +1,1 @@
+import cardSchema from '../search/model.js'

@@ -29,6 +29,7 @@ usersSchema.pre("save", async function (next) {
     const hash = await bcrypt.hash(plainPW, 11);
     currentUser.password = hash;
   }
+  next()
 });
 
 usersSchema.methods.toJSON = function () {

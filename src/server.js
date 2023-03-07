@@ -4,6 +4,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import usersRouter from "./api/users/index.js";
 import searchRouter from "./api/search/index.js";
+import setsRouter from "./api/sets/index.js";
+import listingsRouter from "./api/listings/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -13,6 +15,8 @@ server.use(express.json());
 
 server.use("/users", usersRouter);
 server.use('/search', searchRouter)
+server.use("/sell", listingsRouter)
+server.use("/sets", setsRouter)
 
 mongoose.connect(process.env.MONGO_URL);
 

@@ -5,11 +5,30 @@ import Token from "./tokenSchema.js";
 import { createAccessToken } from "../../lib/auth/tools.js";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 import { activeCheckMiddleware } from "../../lib/auth/activeCheck.js";
+import userPurchaseModel from "./userPurchaseModel.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import sendgridTransport from "nodemailer-sendgrid-transport";
 
 const usersRouter = express.Router();
+
+usersRouter.get(
+  "/",
+  JWTAuthMiddleware,
+  activeCheckMiddleware,
+  async (req, res, next) => {
+    try {
+      const users = await usersModel.find({});
+      if (users) {
+        res.send(users);
+      } else {
+        res.status(404).send();
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
@@ -26,21 +45,27 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/:username", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = await usersModel.findOne({username: req.params.username}).select("-street -zip -city -_id")
-    if(user){
-      res.send(user)
+    const user = await usersModel
+      .findOne({ username: req.params.username })
+      .select("-street -zip -city -_id");
+    if (user) {
+      res.send(user);
+    } else {
+      next(
+        createHttpError(
+          404,
+          `User not found for username "${req.params.username}"`
+        )
+      );
     }
-    else{
-      next(createHttpError(404, `User not found for username "${req.params.username}"`))
-    }
-    
   } catch (err) {
-    next(err)
+    next(err);
   }
-})
+});
 
 usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
+    
     const updatedUser = await usersModel.findByIdAndUpdate(
       req.user._id,
       req.body,
@@ -60,6 +85,8 @@ usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new usersModel(req.body);
     const { _id, email } = await newUser.save();
+    const userDetails = new userPurchaseModel({userId: _id})
+    await userDetails.save()
     let token = new Token({
       _userId: _id,
       token: crypto.randomBytes(16).toString("hex"),
@@ -142,7 +169,7 @@ usersRouter.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
     const user = await usersModel.checkCredentials(email, password);
     if (user) {
-      const payload = { _id: user._id, email: user.email };
+      const payload = { _id: user._id, email: user.email, active: user.active };
       const accessToken = await createAccessToken(payload);
       res.send({ accessToken });
     } else {

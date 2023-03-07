@@ -7,8 +7,9 @@ export const activeCheckMiddleware = (req, res, next) => {
     next(
       createHttpError(
         403,
-        "Active your account before carrying out this operation"
+        "Activate your account before carrying out this operation"
       )
     );
   }
 };
+0
