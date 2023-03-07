@@ -68,7 +68,7 @@ const cardSchema = new Schema(
     prices: { type: Object },
     related_uris: { type: Object },
   },
-  { timestamps: false }
+  { timestamps: false },
 );
 
 cardSchema.static("pagination", async function (query) {

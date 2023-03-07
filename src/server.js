@@ -6,6 +6,7 @@ import usersRouter from "./api/users/index.js";
 import searchRouter from "./api/search/index.js";
 import setsRouter from "./api/sets/index.js";
 import listingsRouter from "./api/listings/index.js";
+import cardRouter from "./api/cardInfo/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -14,9 +15,10 @@ server.use(cors());
 server.use(express.json());
 
 server.use("/users", usersRouter);
-server.use('/search', searchRouter)
-server.use("/sell", listingsRouter)
-server.use("/sets", setsRouter)
+server.use("/search", searchRouter);
+server.use("/cards", cardRouter);
+server.use("/sell", listingsRouter);
+server.use("/sets", setsRouter);
 
 mongoose.connect(process.env.MONGO_URL);
 
