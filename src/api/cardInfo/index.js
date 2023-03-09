@@ -48,15 +48,5 @@ cardRouter.get("/:cardName", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-cardRouter.get("/images/:cardmarketId", async (req, res, next) => {
-  try {
-    const cardMatch = await cardModel
-      .find({ cardmarket_id: req.params.cardmarketId })
-      .select("-_id image_uris");
-    res.send(cardMatch);
-  } catch (err) {
-    next(err);
-  }
-});
 
 export default cardRouter;

@@ -6,7 +6,7 @@ const { model, Schema } = mongoose;
 const listingsSchema = new Schema(
   {
     sellerId: { type: Schema.Types.ObjectId, ref: "users", required: true },
-    cardmarketId: { type: Number, required: true },
+    cardmarketId: { type: String, required: true },
     quantity: { type: Number, required: true },
     name: { type: String, required: true },
     cn: { type: Number, required: true },
@@ -27,16 +27,15 @@ listingsSchema.static("pagination", async function (query) {
     .limit(query.options.limit)
     .sort(query.options.sort)
     .populate({
+      path: "cardmarketId",
+      match: { cardmarket_id: { $in: ["cardinfos"] } },
+    })
+    
+    .populate({ 
       path: "sellerId",
       select: "username -_id",
     });
   return { total, products };
-});
-
-listingsSchema.virtual("cardInformation", {
-  ref: cardModel,
-  localField: "cardmarketId",
-  foreignField: "cardmarket_id",
 });
 
 export default model("listing", listingsSchema);
