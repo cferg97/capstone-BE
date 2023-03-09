@@ -8,11 +8,14 @@ const searchRouter = express.Router();
 searchRouter.get("/", async (req, res, next) => {
   try {
     const mongoQuery = q2m(req.query);
-
-    console.log(mongoQuery.criteria);
-
-    // const cards = await cardSchema.find(mongoQuery.criteria);
-    // res.send(cards);
+    
+    const { total, products } = await cardSchema.pagination(mongoQuery);
+    res.send({
+      links: mongoQuery.links("http://localhost:3001/search", total),
+      total,
+      totalPages: Math.ceil(total / mongoQuery.options.limit),
+      products,
+    });
   } catch (err) {
     next(err);
   }

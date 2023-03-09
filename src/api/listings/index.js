@@ -1,17 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import listingsModel from "./model.js";
+import cardModel from "../search/model.js";
 import express from "express";
+import q2m from "query-to-mongo";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const listingsRouter = express.Router();
 
-listingsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
+listingsRouter.get("/", async (req, res, next) => {
   try {
-    const listings = await listingsModel.find({}).populate({
-      path: "sellerId",
-      select: "username -_id"
+    const mongoQuery = q2m(req.query);
+    const { total, products } = await listingsModel.pagination(mongoQuery);
+    res.send({
+      links: mongoQuery.links("http://localhost:3001/sell", total),
+      total,
+      totalPages: Math.ceil(total / mongoQuery.options.limit),
+      products,
     });
-    res.send(listings);
   } catch (err) {
     next(err);
   }

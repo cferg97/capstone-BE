@@ -77,7 +77,8 @@ cardSchema.static("pagination", async function (query) {
   const products = await this.find(query.criteria, query.options.fields)
     .skip(query.options.skip)
     .limit(query.options.limit)
-    .sort(query.options.sort);
+    .sort(query.options.sort)
+    .select("name set_name image_uris")
 
   return { total, products };
 });
