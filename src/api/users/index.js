@@ -9,6 +9,7 @@ import userPurchaseModel from "./userPurchaseModel.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import sendgridTransport from "nodemailer-sendgrid-transport";
+import q2m from "query-to-mongo";
 
 const usersRouter = express.Router();
 
@@ -18,12 +19,14 @@ usersRouter.get(
   activeCheckMiddleware,
   async (req, res, next) => {
     try {
-      const users = await usersModel.find({});
-      if (users) {
-        res.send(users);
-      } else {
-        res.status(404).send();
-      }
+      const mongoQuery = q2m(req.query);
+      const { total, users } = await usersModel.pagination(mongoQuery);
+      res.send({
+        links: mongoQuery.links("http://localhost:3001/users", total),
+        total,
+        totalPages: Math.ceil(total / mongoQuery.options.limit),
+        users,
+      });
     } catch (err) {
       next(err);
     }
@@ -65,7 +68,6 @@ usersRouter.get("/:username", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    
     const updatedUser = await usersModel.findByIdAndUpdate(
       req.user._id,
       req.body,
@@ -85,8 +87,11 @@ usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new usersModel(req.body);
     const { _id, email } = await newUser.save();
-    const userDetails = new userPurchaseModel({userId: _id})
-    await userDetails.save()
+    const userDetails = new userPurchaseModel({ userId: _id });
+    const userAct = await userDetails.save();
+    await usersModel.findByIdAndUpdate(_id, {
+      $push: { userActivity: userAct._id },
+    });
     let token = new Token({
       _userId: _id,
       token: crypto.randomBytes(16).toString("hex"),

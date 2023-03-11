@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-
 const { Schema, model } = mongoose;
 
 const usersSchema = new Schema(
@@ -16,6 +15,11 @@ const usersSchema = new Schema(
     city: { type: String, required: true },
     country: { type: String, required: true },
     active: { type: Boolean, default: false, required: true },
+    userActivity: {
+      type: Schema.Types.ObjectId,
+      ref: "userPurchaseDetails",
+      required: false,
+    },
   },
   {
     timestamps: true,
@@ -29,7 +33,7 @@ usersSchema.pre("save", async function (next) {
     const hash = await bcrypt.hash(plainPW, 11);
     currentUser.password = hash;
   }
-  next()
+  next();
 });
 
 usersSchema.methods.toJSON = function () {
@@ -54,6 +58,21 @@ usersSchema.static("checkCredentials", async function (email, password) {
   } else {
     return null;
   }
+});
+
+usersSchema.static("pagination", async function (query) {
+  const total = await this.countDocuments(query.criteria);
+
+  const users = await this.find(query.criteria, query.options.fields)
+    .skip(query.options.skip)
+    .limit(query.options.limit)
+    .sort(query.options.sort)
+    .populate({
+      path: "userActivity",
+      select: "purchases sales -_id",
+    });
+
+  return { total, users };
 });
 
 export default model("users", usersSchema);

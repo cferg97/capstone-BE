@@ -4,7 +4,7 @@ import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const cardRouter = express.Router();
 
-cardRouter.get("/:cardName", JWTAuthMiddleware, async (req, res, next) => {
+cardRouter.get("/:cardName", async (req, res, next) => {
   try {
     const sets = [];
     const imageUris = [];
@@ -48,5 +48,15 @@ cardRouter.get("/:cardName", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+cardRouter.get("/singles/:cardmarketId", async (req, res, next) => {
+  try {
+    const card = await cardModel.findOne({
+      cardmarket_id: req.params.cardmarketId,
+    });
+    res.send(card);
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default cardRouter;

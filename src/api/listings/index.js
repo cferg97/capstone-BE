@@ -9,8 +9,6 @@ const listingsRouter = express.Router();
 
 listingsRouter.get("/", async (req, res, next) => {
   try {
-    let ids = [];
-    let imgUrls = [];
     const mongoQuery = q2m(req.query);
     const { total, products } = await listingsModel.pagination(mongoQuery);
 
@@ -25,15 +23,15 @@ listingsRouter.get("/", async (req, res, next) => {
   }
 });
 
-// listingsRouter.get("/images/:id", async (req, res, next) => {
-//   try {
-//     let cardImg = await cardModel
-//       .findOne({ cardmarket_id: req.params.id })
-//       .select("-_id image_uris");
-//     res.send({ image: cardImg.image_uris.normal });
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+listingsRouter.get("/:id", async (req, res, next) => {
+  try {
+    let cards = await listingsModel.find({ cardmarketId: req.params.id.toString() });
+    if (cards) {
+      res.send(cards);
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default listingsRouter;
