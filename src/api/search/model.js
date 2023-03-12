@@ -68,7 +68,7 @@ const cardSchema = new Schema(
     prices: { type: Object },
     related_uris: { type: Object },
   },
-  { timestamps: false },
+  { timestamps: false }
 );
 
 cardSchema.static("pagination", async function (query) {
@@ -78,7 +78,7 @@ cardSchema.static("pagination", async function (query) {
     .skip(query.options.skip)
     .limit(query.options.limit)
     .sort(query.options.sort)
-    .select("name set_name image_uris")
+    .select("name set_name image_uris rarity collector_number prices cardmarket_id");
 
   return { total, products };
 });

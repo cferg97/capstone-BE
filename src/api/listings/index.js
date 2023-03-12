@@ -25,7 +25,12 @@ listingsRouter.get("/", async (req, res, next) => {
 
 listingsRouter.get("/:id", async (req, res, next) => {
   try {
-    let cards = await listingsModel.find({ cardmarketId: req.params.id.toString() });
+    let cards = await listingsModel
+      .find({ cardmarketId: req.params.id.toString() })
+      .populate({
+        path: "sellerId",
+        select: "-_id username country",
+      });
     if (cards) {
       res.send(cards);
     }
