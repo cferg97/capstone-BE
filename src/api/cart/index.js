@@ -20,28 +20,33 @@ cartRouter.get(
         .find({ userId: req.user._id })
         .populate({
           path: "userId",
-          select: "-userActivity -createdAt -active",
+          select: "_id",
         })
         .populate({
-          path: "items",
-          select: "-quantity",
+          path: "cart.items",
+          populate: {
+            path: "listingId",
+            select: "_id",
+          },
+          populate: {
+            path: "seller",
+            select: "username -_id",
+          },
         });
       if (cart.length > 0) {
-        res.send({cart});
+        res.send(cart);
       } else {
         const newCart = new cartModel({ userId: req.user._id });
-        const userCart = await (
-          await newCart.save()
-        )
-          .populate({
-            path: "userId",
-            select: "-userActivity -createdAt -active",
-          })
-          .populate({
-            path: "items",
-            select: "-quantity",
-          });
-        res.send({ userCart });
+        const userCart = await newCart.save();
+        // .populate({
+        //   path: "userId",
+        //   select: "-userActivity -createdAt -active",
+        // })
+        // .populate({
+        //   path: "items",
+        //   select: "-quantity",
+        // });
+        res.send([userCart]);
       }
     } catch (err) {
       next(err);
@@ -51,29 +56,30 @@ cartRouter.get(
 
 cartRouter.put("/:itemid", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const item = await listingsModel.find({ cardmarketId: req.params.itemid });
+    const item = await listingsModel.findOne({
+      cardmarketId: req.params.itemid,
+    });
+    const userCart = await cartModel.findOne({ userId: req.user._id });
 
-    const cart = await cartModel.find({ userId: req.user._id });
-    if (cart) {
-      const newCart = await cartModel.findOneAndUpdate(
-        { userId: req.user._id },
-        {
-          $push: { items: item },
-        }
-      );
-      if (newCart) {
-        res.status(201).send();
-      }
-    } else {
-      const newCart = new cartModel({ userId: req.user._id });
-      const { _id } = await newCart.save();
-      await cartModel.findByIdAndUpdate(
-        { _id },
-        {
-          $push: { items: item },
-        }
-      );
-      res.status(201).send();
+    const updatedCart = await cartModel.findOneAndUpdate(
+      { userId: req.user._id },
+      {
+        $push: {
+          "cart.items": {
+            listingId: item._id,
+            itemId: item.cardmarketId,
+            name: item.name,
+            seller: item.sellerId,
+            condition: item.condition,
+            price: item.price,
+            quantity: 1,
+          },
+        },
+      },
+      { new: true, upsert: true }
+    );
+    if (updatedCart) {
+      res.status(204).send();
     }
   } catch (err) {
     next(err);
@@ -85,10 +91,15 @@ cartRouter.delete("/:itemid", JWTAuthMiddleware, async (req, res, next) => {
     const cart = await cartModel.findOneAndUpdate(
       { userId: req.user._id },
       {
-        $pull: { items: req.params.itemid },
+        $pull: { "cart.items": { itemId: req.params.itemid } },
       }
     );
-  } catch (err) {}
+    if (cart) {
+      res.status(204).send();
+    }
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default cartRouter;

@@ -26,5 +26,5 @@ export const forbiddenHandler = (err, req, res, next) => {
 
 export const genericErrorHandler = (err, req, res, next) => {
   console.log(err);
-  res.status(500).send({ message: "We gonna fix it asap!" });
+  res.status(500).send({ message: "Internal Server Error - our bad! We're on it." });
 };
