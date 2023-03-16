@@ -34,10 +34,12 @@ cartRouter.get(
           },
         });
       if (cart.length > 0) {
-        res.send(cart);
+        res.send(cart[0].cart);
       } else {
         const newCart = new cartModel({ userId: req.user._id });
-        const userCart = await newCart.save();
+        const {userCart}= await newCart.save();
+
+         
         // .populate({
         //   path: "userId",
         //   select: "-userActivity -createdAt -active",
@@ -46,7 +48,7 @@ cartRouter.get(
         //   path: "items",
         //   select: "-quantity",
         // });
-        res.send([userCart]);
+        res.send(userCart);
       }
     } catch (err) {
       next(err);
@@ -59,7 +61,6 @@ cartRouter.put("/:itemid", JWTAuthMiddleware, async (req, res, next) => {
     const item = await listingsModel.findOne({
       cardmarketId: req.params.itemid,
     });
-    const userCart = await cartModel.findOne({ userId: req.user._id });
 
     const updatedCart = await cartModel.findOneAndUpdate(
       { userId: req.user._id },

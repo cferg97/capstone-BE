@@ -4,6 +4,7 @@ import cardModel from "../search/model.js";
 import express from "express";
 import q2m from "query-to-mongo";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
+import { activeCheckMiddleware } from "../../lib/auth/activeCheck.js";
 
 const listingsRouter = express.Router();
 
@@ -22,6 +23,18 @@ listingsRouter.get("/", async (req, res, next) => {
     next(err);
   }
 });
+
+listingsRouter.post(
+  "/:itemid",
+  JWTAuthMiddleware,
+  activeCheckMiddleware,
+  async (req, res, next) => {
+    try {
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 listingsRouter.get("/:id", async (req, res, next) => {
   try {
