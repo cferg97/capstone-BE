@@ -7,8 +7,14 @@ import searchRouter from "./api/search/index.js";
 import setsRouter from "./api/sets/index.js";
 import listingsRouter from "./api/listings/index.js";
 import cardRouter from "./api/cardInfo/index.js";
-import { badRequestHandler, forbiddenHandler, genericErrorHandler, unauthorizedHandler } from "./errorHandlers.js";
+import {
+  badRequestHandler,
+  forbiddenHandler,
+  genericErrorHandler,
+  unauthorizedHandler,
+} from "./errorHandlers.js";
 import cartRouter from "./api/cart/index.js";
+import reviewRouter from "./api/sellerFeedback/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -21,12 +27,13 @@ server.use("/search", searchRouter);
 server.use("/cards", cardRouter);
 server.use("/sell", listingsRouter);
 server.use("/sets", setsRouter);
-server.use("/carts", cartRouter)
+server.use("/carts", cartRouter);
+server.use("/reviews", reviewRouter);
 
-server.use(badRequestHandler)
-server.use(unauthorizedHandler)
-server.use(forbiddenHandler)
-server.use(genericErrorHandler)
+server.use(badRequestHandler);
+server.use(unauthorizedHandler);
+server.use(forbiddenHandler);
+server.use(genericErrorHandler);
 
 mongoose.connect(process.env.MONGO_URL);
 

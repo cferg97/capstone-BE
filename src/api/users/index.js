@@ -50,7 +50,7 @@ usersRouter.get("/:username", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const user = await usersModel
       .findOne({ username: req.params.username })
-      .select("-street -zip -city -_id");
+      .select("-street -zip -city");
     if (user) {
       res.send(user);
     } else {
