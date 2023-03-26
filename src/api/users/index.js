@@ -35,7 +35,9 @@ usersRouter.get(
 
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = await usersModel.findById(req.user._id);
+    const user = await usersModel.findById(req.user._id).populate({
+      path: "userActivity",
+    });
     if (user) {
       res.send(user);
     } else {
@@ -50,7 +52,10 @@ usersRouter.get("/:username", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const user = await usersModel
       .findOne({ username: req.params.username })
-      .select("-street -zip -city");
+      .select("-street -zip -city")
+      .populate({
+        path: "userActivity",
+      });
     if (user) {
       res.send(user);
     } else {

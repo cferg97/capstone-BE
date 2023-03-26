@@ -30,14 +30,15 @@ listingsRouter.post(
   activeCheckMiddleware,
   async (req, res, next) => {
     try {
-      const card = cardModel.find({ cardmarket_id: req.params.itemid });
+      const card = await cardModel.findOne({ cardmarket_id: req.params.itemid });
+      console.log(card)
       const newListing = new listingsModel({
-        ...req.body,
-        name: card.name,
+        name: card?.name,
         sellerId: req.user._id,
         cardmarketId: req.params.itemid,
         cn: card.collector_number,
-        rarity: card.rarity,
+        rarity: card?.rarity,
+        ...req.body,
       });
       await newListing.save();
       res.status(204).send();

@@ -12,7 +12,7 @@ const listingsSchema = new Schema(
     cn: { type: Number, required: true },
     condition: { type: String, required: true },
     language: { type: String, required: true },
-    price: { type: Number, required: true },
+    price: { type: Number, min: 0.01, required: true },
     rarity: { type: String, required: true },
   },
   {
