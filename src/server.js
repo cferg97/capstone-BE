@@ -15,6 +15,7 @@ import {
 } from "./errorHandlers.js";
 import cartRouter from "./api/cart/index.js";
 import reviewRouter from "./api/sellerFeedback/index.js";
+import commentRouter from "./api/cardComments/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -29,6 +30,7 @@ server.use("/sell", listingsRouter);
 server.use("/sets", setsRouter);
 server.use("/carts", cartRouter);
 server.use("/reviews", reviewRouter);
+server.use("/comments", commentRouter);
 
 server.use(badRequestHandler);
 server.use(unauthorizedHandler);
