@@ -5,17 +5,13 @@ import reviewModel from "./model.js";
 
 const reviewRouter = express.Router();
 
-reviewRouter.get("/:userid", async (req, res, next) => {
+reviewRouter.get("/:sellername", async (req, res, next) => {
   try {
     const reviews = await reviewModel
-      .find({ sellerId: req.params.userid })
+      .find({ seller: req.params.sellername })
       .populate({
-        path: "sellerId",
-        select: "username -_id",
-      })
-      .populate({
-        path: "reviewerId",
-        select: "username -_id",
+        path: "reviewer",
+        select: "-_id username"
       });
     res.send(reviews);
   } catch (err) {
@@ -24,15 +20,15 @@ reviewRouter.get("/:userid", async (req, res, next) => {
 });
 
 reviewRouter.post(
-  "/:userid",
+  "/:sellername",
   JWTAuthMiddleware,
   activeCheckMiddleware,
   async (req, res, next) => {
     try {
       const newReview = new reviewModel({
+        seller: req.params.sellername,
+        reviewer: req.user._id,
         ...req.body,
-        sellerId: req.params.userid,
-        reviewerId: req.user._id,
       });
       await newReview.save();
       res.status(204).send();

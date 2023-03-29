@@ -24,7 +24,7 @@ commentRouter.post(
   async (req, res, next) => {
     try {
       const newComment = new commentModel({
-        comment: req.body.comment,
+        text: req.body.text,
         cardmarketId: req.params.cardId,
         posterId: req.user._id,
       });
